@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if test "$1" = "--help" ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g')
+
+Updates the CompleteTestSuiteRunnerConstants-interface class at the
+project base package (prjBasePackage).
+
+Requires project-info."
+    exit
+fi
+
+source javautils-project-info
+source javautils-functions
+
+testRunner=$prjBasePackage.CompleteTestSuiteRunner
+testRunnerConstants=${testRunner}Constants
+
+testRunnerConstantsCode="$(javautils-create-junit-test-runner-constants $testRunnerConstants $srcRoot '*Test.java')"
+
+testRunnerConstantsJava="$srcRoot/$(java-of-cl $testRunnerConstants)"
+
+function write-test-runner-constants {
+    echo "Writing new test runner constants to '$testRunnerConstantsJava'"
+    echo "$testRunnerConstantsCode" > $testRunnerConstantsJava
+}
+
+if ! test -f $testRunnerConstantsJava ; then
+    write-test-runner-constants
+elif ! echo "$testRunnerConstantsCode" | diff - $testRunnerConstantsJava > /dev/null ; then
+    write-test-runner-constants
+fi

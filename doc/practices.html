@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Development Practices</title>
+  </head>
+
+  <body>
+    <h1>Development Practices</h1>
+
+    <p>
+      A developer who has write access to the JavaUtils repository is free
+      to make any changes to the JavaUtils code base, update the home
+      pages, perform releases, etc... However, certain principles and
+      practices should be understood, agreed upon and adhered to, so that
+      risks are minimized.
+    </p>
+
+    <h3>General Principles</h3>
+
+    <ul>
+      <li>
+        Everyone is responsible for ensuring that legal issues are
+        observed:
+        <ul>
+          <li>If you use code written by someone else, make sure that:
+            <ul>
+              <li>You have the right to use the code.</li>
+              <li>You follow the license requirements carefully.</li>
+              <li>Use of the code does not jeopardize the project.</li>
+            </ul>
+          </li>
+          <li>All code should carry a copyright statement.</li>
+          <li>All code should preferably be under the LGPL license.</li>
+        </ul>
+      </li>
+      <li>Code ownership and responsibility is shared:
+        <ul>
+          <li>
+            Anyone working on the project is free to change any code, as
+            long as the other principles are observed.
+          </li>
+        </ul>
+      </li>
+      <li>Simplicity first / Use refactoring to keep code simple:
+        <ul>
+          <li>
+            Everyone is responsible for keeping the code and scripts as
+            simple as possible.
+          </li>
+          <li>
+            If the functionality remains the same, code should not be
+            changed unless the change is towards simplicity.
+          </li>
+          <li>
+            Code that is not going to be used, should not be added. Unused
+            code should be removed.
+          </li>
+          <li>
+            Clear and easy to understand code is preferred to heavy
+            commenting.
+          </li>
+        </ul>
+      </li>
+      <li>
+        Everything that might brake should be tested (automatically).
+      </li>
+      <li>Automate everything / Keep everything automated:
+        <ul>
+          <li>
+            By automating all kinds of processes (build, test, release,
+            update, ...), working on the project will be easier, safer and
+            faster.
+          </li>
+          <li>
+            Anyone working on the project should have the knowledge and
+            skills required to perform a release, for instance.
+          </li>
+          <li>
+            If someone, for example, makes a change to the release
+            process, others do not necessarily need to know about it,
+            because the change is applied automatically.
+          </li>
+        </ul>
+      </li>
+    </ul>
+
+    <h3>Preferred Java / Formatting Style</h3>
+
+    <ul>
+      <li>
+        Wildcard import statements should not be used, because they
+        introduce the risk that code may break when new classes are added
+        to external packages. It is better to not use wildcard import
+        statements than fix things later.
+      </li>
+      <li>
+        Import statements should be kept sorted so that it is easier to
+        search them.
+      </li>
+      <li>
+        Tab-characters should not be used, because they cause formatting
+        problems between just about any tool. Most editors have an option
+        to not insert tabs.
+      </li>
+    </ul>
+
+    <p>
+      I personally use <a target="_top"
+      href="http://jdee.sunsite.dk/">JDEE</a> / <a target="_top"
+      href="http://www.xemacs.org">XEmacs</a> as my development
+      environment, because the environment allows me to <em>easily</em>
+      automate everything. For example, it inserts import statements and
+      keeps them sorted for me.
+    </p>
+
+    <hr>
+
+<!-- hhmts start -->
+Last modified: Mon Dec  8 21:10:49 EET 2003
+<!-- hhmts end -->
+  </body>
+</html>

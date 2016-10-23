@@ -1,0 +1,31 @@
+#!/bin/bash
+
+if test "$1" = "--help" ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g')
+
+Updates the project public WWW home page:
+1. Verifies HTML files
+2. Builds documentation
+3. Uploads the pages to the public WWW server.
+
+Requires project-info."
+    exit
+fi
+
+source javautils-project-info
+
+export htdocsTar=$prjName-htdocs.tar.bz2 && \
+javautils-verify-html && \
+export account="$(javautils-read-property "(SourceForge) User name: " sourceforgeUser)@shell.sourceforge.net" && \
+echo "Account: $account" && \
+javautils-build-doc && \
+mkdir -p $tmpDir/htdocs && \
+cp -r $prjRoot/doc $tmpDir/htdocs && \
+cp $prjRoot/index.html $tmpDir/htdocs && \
+rm -rf $(find $tmpDir/htdocs -name 'CVS' -o -regex "$docFilesExcludedFromHomePage") && \
+chmod a+rx $(find $tmpDir/htdocs -path '*') && \
+tar -cjf $tmpDir/$htdocsTar -C $tmpDir/htdocs . && \
+scp -p $tmpDir/$htdocsTar "${account}:${htdocs}/$htdocsTar" && \
+rm -rf $tmpDir && \
+ssh ${account} "cd ${htdocs} && rm -rf index.html doc && tar -xmjf $htdocsTar && rm $htdocsTar"

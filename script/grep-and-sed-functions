@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# Copyright (C) 2002  MMM
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2 of the License, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+# more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc., 59
+# Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+function sed-from {
+    local tmp="$1"
+    shift 1
+    echo "$tmp" | sed "$@"
+}
+
+function replace-in-file {
+    local file="$1"
+    shift 1
+    local tmp=$(cat "$file")
+    echo "$tmp" | sed "$@" > "$file"
+}
+
+function grep-from {
+    local tmp="$1"
+    shift 1
+    echo "$tmp" | grep "$@"
+}
+
+function to-lower {
+    tr '[:upper:]' '[:lower:]'
+}
+
+function to-upper {
+    tr '[:lower:]' '[:upper:]'
+}
+
+function first-to-upper-from {
+    local rest=$(sed-from "$1" 's#^.##g')
+    local first=$(sed-from "$1" "s#$rest\$##g")
+    echo $(echo "$first" | to-upper)$rest
+}
+
+function paste-from {
+    tmpFile1=$(tempfile)
+    tmpFile2=$(tempfile)
+    echo "$1" > $tmpFile1
+    echo "$2" > $tmpFile2
+    shift 2
+    paste "$@" $tmpFile1 $tmpFile2
+    rm $tmpFile1 $tmpFile2
+}

@@ -1,0 +1,45 @@
+#!/bin/bash
+
+if test "$1" = --help ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g')
+
+Replaces references, like [PLOP3], with links to the overview page with
+the same target. The assumption is that the overview page contains the
+bibliographic entries.
+
+TBD: It would probably be a better idea to write a Doclet rather than make
+the source files more complicated.
+
+Requires project-info."
+    exit
+fi
+
+source javautils-project-info
+
+entries=$(echo $(grep -o 'name="\[[[:alnum:]]\+\]"' $(find $srcRoot -name 'overview.html') | sed -e 's#name="\[##g' -e 's#\]"##g') | sed 's# \+#\\|#g')
+
+pat=' \[\('"$entries"'\)\]'
+rep=' [<a href="{@docRoot}/overview-summary.html#[\1]">\1</a>]'
+
+for f in $(grep -l "$pat" $(find $srcRoot -name '*.java' -o -name '*.html')) ; do
+    echo
+    echo "In $f:"
+    grep -n "$pat" "$f"
+    echo "replaced with:"
+    grep -n "$pat" "$f" | sed "s,$pat,$rep,g"
+    read -n 1 -p "Replace? [y]es [n]o : "
+    echo
+    case $REPLY in
+        (y)
+            echo "Replacing."
+            tmp="$(cat "$f")"
+            echo "$tmp" | sed "s,$pat,$rep,g" > "$f"
+            ;;
+        (n)
+            echo "Skipping."
+            ;;
+        (*)
+            exit 1;;
+    esac
+done

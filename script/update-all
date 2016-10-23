@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# Copyright (C) 2003  MMM
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2 of the License, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+# more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc., 59
+# Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+case $1 in
+    (--help | --h | -help | -h | -?)
+        echo \
+'Usage: update-all [checked-out-cvs-dir ...]
+
+If update-all is run without any arguments, then if the current directory
+looks like a checked-out CVS directory, runs cvs update on the current
+directory. Otherwise runs cvs update on all first level sub-directories
+that look like checked-out CVS directories.
+
+If arguments are provided, then runs cvs update on all the specified
+directories that look like checked-out CVS directories.'
+        exit;;
+esac
+
+function has-cvs-files {
+    test -d "$1/CVS" -a \
+         -f "$1/CVS/Entries" -a \
+         -f "$1/CVS/Repository" -a \
+         -f "$1/CVS/Root"
+}
+
+function cvs-update {
+    pushd "$1" > /dev/null && \
+    if test "$1" != . ; then \
+        echo "Updating $1:" ; \
+    fi && \
+    cvs -q -z9 update -d -P && \
+    popd > /dev/null
+}
+
+for f in $(if test "$#" -ne 0 ; then
+               echo "$@"
+           elif has-cvs-files "." ; then
+               echo "."
+           else
+               find -mindepth 1 -maxdepth 1 -type d -path '*'
+           fi) ; do
+    if has-cvs-files "$f" ; then
+        if ! cvs-update "$f" ; then
+            exit
+        fi
+    fi
+done

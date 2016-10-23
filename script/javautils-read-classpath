@@ -1,0 +1,27 @@
+#!/bin/bash
+
+export propertyFile=.javautils.properties
+
+if test "$#" -ne 2 -o "$1" = --help ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g') <packages> <property-name>
+
+Reads the class path for the specified packages.
+"
+    exit
+fi
+
+if ! test -f $propertyFile ; then
+    touch $propertyFile
+fi
+
+name=$2
+packages=$1
+
+if ! grep -q "^$name=" $propertyFile ; then
+    # TBD: Autodetection (/usr/share/java)
+    read -e -p "Give classpath for <$packages>: "
+    echo "$name=$REPLY" >> $propertyFile
+fi
+
+grep "^$name=" $propertyFile | sed "s#^$name=##g"

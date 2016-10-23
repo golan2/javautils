@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if test "$1" = "--help" ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g')
+
+Generates a package.html file for all soure directories that contain Java
+source files, but do not contain a package.html file.
+
+Requires project-info."
+    exit
+fi
+
+source javautils-project-info
+
+for dir in $(find $srcRoot -name '*.java' -a -not -path '*/detail/*' | sed 's#\(.*\)/.*#\1#g' | sort | uniq) ; do
+    if ! test -f $dir/package.html ; then
+        echo "Creating: $dir/package.html"
+        echo \
+'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>JavaDoc package comment</title>
+  </head>
+  <body>
+    <p>
+      TBD: Description of package.
+    </p>
+  </body>
+</html>' > $dir/package.html
+    fi
+done
+

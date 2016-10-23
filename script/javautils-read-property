@@ -1,0 +1,32 @@
+#!/bin/bash
+
+export propertyFile=.javautils.properties
+
+if test "$#" -ne 2 -o "$1" = "--help" ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g') QUESTION NAME
+
+Attempts to read the value of a named property from the file (in the
+current directory):
+
+  $propertyFile
+
+If the property does not exist, ask the user for the value and saves it to
+the file (in the current directory).
+
+The intention is to avoid asking the same questions over and over again
+and at the same time allowing multiple developers to use the same project
+maintenance scripts in a non-intrusive way."
+    exit
+fi
+
+if ! test -f $propertyFile ; then
+    touch $propertyFile
+fi
+
+if ! grep -q "^$2=" $propertyFile ; then
+    read -e -p "$1"
+    echo "$2=$REPLY" >> $propertyFile
+fi
+
+grep "^$2=" $propertyFile | sed "s#^$2=##g"

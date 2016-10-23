@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# This script is a hack. Use at your own risk. This script is provided
+# because some systems do not provide the tempfile command.
+
+seconds=$(date +%s)
+i=0
+
+while test -f $PWD/$seconds.$i ; do
+    i=$((i+1))
+done
+
+touch $PWD/$seconds.$i
+echo $PWD/$seconds.$i

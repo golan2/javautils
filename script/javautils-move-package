@@ -1,0 +1,127 @@
+#!/bin/bash
+
+# Copyright (C) 2002  MMM
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2 of the License, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+# more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc., 59
+# Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+source javautils-functions
+source file-functions
+
+verbose=1
+
+if test "$#" -ne 2 ; then
+    echo \
+'Usage: move-package source.package.name destination.package.name
+
+This script moves the files compromising the souce package into the destination
+package and renames all references, both filename and package patterns, to the
+package.
+
+IMPORTANT: This script is known to be unsafe. Use at your own risk!
+
+NOTES:
+- If the destination package already contains files that are in the source
+  package, then the operation fails. This script can not merge individual
+  java files nor sub-packages.
+- Source and destination packages must not be top-level. In other words,
+  the source and destination package names must contain dots. Otherwise, the
+  operation would be even less safe.'
+    exit
+fi
+
+function declareStrings {
+    export ${1}Pkg=$2
+    export ${1}Dir=$(dir-of-pkg "$2")
+}
+
+declareStrings src "$1"
+declareStrings dst "$2"
+
+if test $srcPkg = $dstPkg ; then
+    exit
+fi
+
+if grep-from $dstDir -q "^$srcDir/" ; then
+    echo "Error: Source package, $srcPkg, is a prefix of the destination package, $dstPkg."
+    exit 1
+fi
+
+#if ! grep-from $srcDir -q '/' || ! grep-from $dstDir -q '/' ; then
+#    echo 'Error: Source and destination packages must not be top-level.'
+#    exit 1
+#fi
+
+if ! grep-from $srcDir -q '/' ; then
+    echo 'Error: Source package must not be top-level.'
+    exit 1
+fi
+
+if test ! -d $srcDir ; then
+    echo "Error: Source directory, \"$srcDir\", does not exists."
+    exit 1
+fi
+
+if is-empty-dir $srcDir ; then
+    if (($verbose)) ; then
+        echo "# rmdir $srcDir"
+    fi
+    rmdir $srcDir
+    exit
+fi
+
+if test ! -e $dstDir ; then
+    mkdir -p $dstDir
+else
+    if test ! -d $dstDir ; then
+        echo "Error: Destination file, \"$dstDir\", is not a directory."
+        exit 1
+    fi
+    for file in $(echo $srcDir/* | sed 's#'$srcDir'/##g') ; do
+        if test -e $dstDir/$file ; then
+            echo "Error: File, \"$file\", already exists in destination directory, \"$dstDir\"."
+            exit 1
+        fi
+    done
+fi
+
+if (($verbose)) ; then
+    echo "# move-package $srcPkg $dstPkg"
+fi
+
+mv $srcDir/* $dstDir/
+rmdir $srcDir
+
+molPat=$(sed-from $srcPkg$idSuffixPat -e 's#\.#[\.\\\/]*#g' -e 's#\[\.\\\/\]\*#\\([\.\\\/]*\\)#')
+molRep=$(sed-from $dstPkg'\2' -e 's#\.#\\1#g')
+molExp='s#'$molPat'#'$molRep'#g'
+
+eolPat=$(sed-from $srcPkg'$' -e 's#\.#[\.\\\/]*#g' -e 's#\[\.\\\/\]\*#\\([\.\\\/]*\\)#')
+eolRep=$(sed-from $dstPkg -e 's#\.#\\1#g')
+eolExp='s#'$eolPat'#'$eolRep'#g'
+
+#if (($verbose)) ; then
+#    echo "# Replacing: $molExp "
+#    echo "# Replacing: $eolExp "
+#fi
+
+# TBD:
+# - What about prefix patterns (sol and idPrefixPat)?
+# - Remove dependency to fi
+
+for f in $(grep --recursive -l -e "$molPat" -e "$eolPat" $(find -mindepth 1 -maxdepth 1 -type d)) ; do
+    replace-in-file "$f" \
+        -e "$molExp" \
+        -e "$eolExp"
+done

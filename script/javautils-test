@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if test "$1" = "--help" ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g')
+
+Compiles the project (regenerating the test runner constants if necessary)
+and runs the complete test suite runner.
+
+This script compiles the project before running the tests, because it
+doesn't make sense to run tests without all the changes compiled in.
+
+Requires project-info."
+    exit
+fi
+
+source javautils-project-info
+
+javautils-compile && \
+echo "Running all tests of $prjName:" && \
+export CLASSPATH="$(javautils-read-classpath "$prjName" "${prjName}Classpath"):$CLASSPATH" && \
+java -ea $prjBasePackage.CompleteTestSuiteRunner

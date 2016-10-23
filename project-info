@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Project
+prjName=javautils
+capitalizedPrjName=JavaUtils
+
+# Build
+function precompile-step {
+    if test script/javautils-create-holder -nt src/javautils/holders/IntHolder.java ; then
+        echo "Updating primitive holders..."
+        for ty in boolean byte char double float int long short ; do
+            capTy="$(echo $ty | sed 's#^\(.\)\(.*\)$#\1#g' | tr '[:lower:]' '[:upper:]')$(echo $ty | sed 's#^\(.\)\(.*\)$#\2#g')"
+            javautils-create-holder $ty javautils.holders > src/javautils/holders/${capTy}Holder.java
+        done
+    fi
+
+    if test script/javautils-create-primitive-typed-map -nt src/javautils/maps/ObjectToIntMap.java ; then
+        echo "Updating primitive type maps holders..."
+        for ty in boolean byte char double float int long short ; do
+            capTy="$(echo $ty | sed 's#^\(.\)\(.*\)$#\1#g' | tr '[:lower:]' '[:upper:]')$(echo $ty | sed 's#^\(.\)\(.*\)$#\2#g')"
+            javautils-create-primitive-typed-map $ty javautils.maps > src/javautils/maps/ObjectTo${capTy}Map.java
+        done
+    fi
+}

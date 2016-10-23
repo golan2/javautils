@@ -1,0 +1,31 @@
+#!/bin/bash
+
+if test "$1" = --help ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g')
+
+Builds the project documentation, including JavaDoc documentation.
+
+Requires project-info."
+    exit
+fi
+
+source javautils-project-info
+
+echo "Building docs for $prjName..."
+
+for makedir in $(echo "$(find $docRoot -name 'Makefile')" | sed 's#Makefile$##'); do
+    make --quiet --no-print-directory -C $makedir
+done
+
+mkdir -p $docRoot/gen-htmls && \
+if test $(newest $(find $srcRoot -type f -not -path '*/CVS/*')) -nt $docRoot/gen-htmls/code-stats.html ; then \
+    javautils-code-statistics > $docRoot/gen-htmls/code-stats.html ; \
+fi && \
+if test $(newest $(find $srcRoot -type f -not -path '*/CVS/*')) -nt $docRoot/gen-htmls/ncss-metrics.html ; then \
+    javautils-ncss-metrics > $docRoot/gen-htmls/ncss-metrics.html ; \
+fi && \
+if test $(newest $(find $srcRoot -type f -not -path '*/CVS/*')) -nt $docRoot/gen-htmls/unique-imports.html ; then \
+    javautils-unique-imports > $docRoot/gen-htmls/unique-imports.html ; \
+fi && \
+javautils-build-javadoc

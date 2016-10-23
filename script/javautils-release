@@ -1,0 +1,63 @@
+#!/bin/bash
+
+if test "$1" = "--help" ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g')
+
+Performs the mechanical steps to a release:
+1. Updates the sources from CVS to avoid surprises.
+2. Rebuilds and tests everything.
+3. Composes a release package.
+4. Waits for the user to preview the contents of the package.
+5. Uploads the package to server.
+6. Asks whether the release should be tagged (finalizing the release).
+7. Updates the project home pages.
+
+Requires project-info."
+    exit
+fi
+
+source javautils-project-info
+
+# TBD:
+# - generate change log
+
+read -p "Specify revision symbol: " revision && \
+export datestr=$(date +%y-%m-%d) && \
+export basename=$prjName-$datestr-$revision && \
+echo "Release will be: $basename" && \
+export updateOutput="$(update-all)" && \
+if test "$updateOutput" != "" ; then \
+    echo \
+"Error: You must test and commit changes before attempting release:
+$updateOutput"
+    exit 1 ; \
+fi && \
+javautils-rebuild-and-test && \
+echo "Composing release for $prjName..." && \
+mkdir -p $tmpDir/$prjName && \
+cp -r $(find $prjRoot -maxdepth 1 -mindepth 1 -not -path $tmpDir) $tmpDir/$prjName && \
+rm -rf $(find $tmpDir -name 'CVS' -o -name '.*' -a -not -path $tmpDir) && \
+tar -cjf $tmpDir/$basename.tar.bz2 -C $tmpDir $prjName && \
+rm -rf $tmpDir/$prjName && \
+tar -tjf $tmpDir/$basename.tar.bz2 | less && \
+read -p "Continue with the release [y/n] ? " && \
+if test "$REPLY" != "y" -a "$REPLY" != "Y" ; then exit ; fi && \
+echo "Uploading release of $prjName to SourceForge..." && \
+pushd $tmpDir > /dev/null && \
+echo "bin
+cd /incoming
+put $basename.tar.bz2
+bye
+" | pftp upload.sourceforge.net && \
+popd > /dev/null && \
+rm -rf $tmpDir && \
+echo "You must now manually create or update the release at SourceForge." && \
+read -p "Would you like to tag the release (with $basename) [y/n] ? " && \
+if test "$REPLY" = "y" -o "$REPLY" = "Y" ; then \
+    echo "Tagging." && \
+    cvs -q tag -c "$basename" ; \
+else \
+    echo "Not tagging." ; \
+fi && \
+javautils-update-home-page

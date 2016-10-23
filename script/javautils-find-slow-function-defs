@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if test "$1" = "--help" ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g')
+
+Tries to locate slow Function-definitions. A slow Function-definition is
+one that could be trivially replaced by an appropriate
+ObjectTo???-definition.
+
+Requires project-info."
+    exit
+fi
+
+source javautils-project-info
+
+idPat='[_[:alpha:]][_[:alnum:]]*'
+wsPat=' \+'
+optFinalPat='\(final$wsPat\)\?'
+objArgPat="${optFinalPat}Object${wsPat}${idPat}"
+
+grep -n -B 1 "\\(Object\\|boolean\\|void\\)${wsPat}with(\\( *${objArgPat} *,\?\\)* *)" $(find $srcRoot -name "*.java" -a -not -name '.*') | grep -A 1 'new \+Function'

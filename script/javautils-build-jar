@@ -1,0 +1,43 @@
+#!/bin/bash
+
+if test "$1" = --help ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g')
+
+Builds the Jar-file of the project.
+
+Requires project-info."
+    exit
+fi
+
+source javautils-project-info
+
+echo "Building jar for $prjName..."
+
+for makedir in $(echo "$(find $srcRoot -name 'Makefile')" | sed 's#Makefile$##'); do
+    make --quiet --no-print-directory -C $makedir
+done
+
+precompile-step && \
+mkdir -p $libRoot && \
+if test $(newest $(find $srcRoot -type f -not -path '*/CVS/*')) -nt $jarName ; then \
+    mkdir -p $tmpDir/jar && \
+    export CLASSPATH="$(javautils-read-classpath "$prjName" "${prjName}Classpath"):$CLASSPATH" && \
+    javac \
+        -source 1.4 \
+        -deprecation \
+        -d $tmpDir/jar \
+        -g:none \
+        -O \
+        $(find $srcRoot -name '*.java' \
+                         -a -not -name '.*' \
+                         -a -not -name '*Test.java' \
+                         -a -not -name '*TestSuite*.java' \
+                         -a -not -regex "$sourcesExcludedFromJar") && \
+    javautils-copy-resources $tmpDir/jar && \
+    rm -rf $jarName && \
+    jar cf $jarName -C $tmpDir/jar . && \
+    rm -rf $tmpDir ; \
+else \
+    echo "...which already appears to be up to date." ; \
+fi

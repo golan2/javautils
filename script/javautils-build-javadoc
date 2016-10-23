@@ -1,0 +1,40 @@
+#!/bin/bash
+
+if test "$1" = --help ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g')
+
+Builds JavaDoc documentation.
+
+Requires project-info."
+    exit
+fi
+
+source javautils-project-info
+
+echo "Rebuilding JavaDoc for $prjName..." && \
+mkdir -p $javaDocRoot && \
+if test $(newest $(find $srcRoot -type f -not -path '*/CVS/*')) -nt $javaDocRoot/index.html ; then \
+    rm -rf $javaDocRoot/* && \
+    export CLASSPATH="$(javautils-read-classpath "$prjName" "${prjName}Classpath"):$CLASSPATH" && \
+    javadoc \
+        -sourcepath $srcRoot \
+        -source 1.4 \
+        -d $javaDocRoot \
+        -windowtitle "$capitalizedPrjName" \
+        -doctitle "$capitalizedPrjName" \
+        $(if test -f "$srcRoot/$prjName/stylesheet.css" ; then \
+              echo -stylesheetfile "$srcRoot/$prjName/stylesheet.css" ; \
+          fi) \
+        $(if test -f "$srcRoot/$prjName/overview.html" ; then \
+              echo -overview "$srcRoot/$prjName/overview.html" ; \
+          fi) \
+        $(find $srcRoot -name '*.java' -a -not -path '*/detail/*' -a -not -name '.*' | \
+          sed -e 's#/[^/]*\.java##g' | \
+          sort | \
+          uniq | \
+          sed -e "s#$srcRoot/##g" -e 's#/#.#g') \
+    > /dev/null ; \
+else \
+    echo "...which already appears to be up to date." ; \
+fi

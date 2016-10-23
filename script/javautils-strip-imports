@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Copyright (C) 2002  MMM
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2 of the License, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+# more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc., 59
+# Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+source javautils-functions
+
+if test "$#" -lt 1 -o "$1" = --help ; then
+    echo 'Usage: strip-imports <java-source-file> ...
+
+Removes bluntly redundant import statements from the specified Java source
+file(s).
+
+NOTE: The specified Java source file must be writable.
+
+IMPORTANT: Use at your own risk!'
+    exit
+fi
+
+verbose=0
+doReplace=1
+
+for par in "$@" ; do
+    case $par in
+        (--verbose)
+            verbose=1;;
+        (--no-replace)
+            doReplace=0;;
+        (*)
+            break;;
+    esac
+    shift 1
+done
+
+function imported-classes {
+    grep -e "$importClPat" "$1" | \
+    sed -e 's#import##g' \
+        -e "s#$wsPat##g" \
+        -e 's#;##g'
+}
+
+for file in "$@" ; do
+    if (($verbose)) ; then
+        echo "In file $file"
+    fi
+    for qcl in $(imported-classes "$file") ; do
+        ucl=$(ucl-of-qcl "$qcl")
+        if ! grep -q \
+                -e $idPrefixPat$ucl$idSuffixPat \
+                -e $idPrefixPat$ucl'$' \
+                -e          '^'$ucl$idSuffixPat \
+                -e          '^'$ucl'$' \
+                "$file" ; then
+            if (($verbose)) ; then
+                echo "  $qcl"
+            fi
+            if (($doReplace)) ; then
+                replace-in-file "$file" \
+                    -e $'s#^[ \t]*'"import$wsPat$qcl"$'[ \t]*;##g'
+            fi
+        fi
+    done
+done

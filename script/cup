@@ -1,0 +1,4 @@
+#!/bin/sh
+
+export CLASSPATH="$(javautils-read-classpath cup cupClasspath):$CLASSPATH" && \
+exec java java_cup.Main "$@"

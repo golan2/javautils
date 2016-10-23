@@ -1,0 +1,11 @@
+javautils
+javautils.collections
+javautils.dispensers
+javautils.fun
+javautils.graph
+javautils.graph.adt
+javautils.graph.templates
+javautils.graph.testing
+javautils.holders
+javautils.jdbc
+javautils.maps

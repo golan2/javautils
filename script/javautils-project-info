@@ -1,0 +1,83 @@
+#!/bin/bash
+
+if ! test -f ./project-info ; then
+    echo 'Error: No local project-info file.'
+    exit 1
+fi
+
+source grep-and-sed-functions
+source ./project-info
+
+if test "$prjName" == "" ; then
+    echo 'Error: prjName must be defined.'
+fi
+
+if test "$capitalizedPrjName" == "" ; then
+    capitalizedPrjName="$prjName"
+fi
+
+if test "$prjBasePackage" = "" ; then
+    if echo "$prjName" | grep -q '[^_[:alnum:]]' ; then
+        echo \
+"Error: You must define prjBasePackage, because prjName '$prjName'
+contains illegal characters for a package name."
+        exit 1
+    fi
+    prjBasePackage="$prjName"
+fi
+
+if test "$dependencies" == "" ; then
+    dependencies=''
+fi
+
+if test "$prjRoot" == "" ; then
+    prjRoot=.
+fi
+
+if test "$libRoot" == "" ; then
+    libRoot="$prjRoot/lib"
+fi
+
+if test "$jarName" == "" ; then
+    jarName="$libRoot/$prjName.jar"
+fi
+
+if test "$srcRoot" == "" ; then
+    srcRoot="$prjRoot/src"
+fi
+
+if test "$classesRoot" == "" ; then
+    classesRoot="$prjRoot/classes"
+fi
+
+if test "$tmpDir" == "" ; then
+    tmpDir="$prjRoot/.tmp"
+fi
+
+if test "$docRoot" == "" ; then
+    docRoot="$prjRoot/doc"
+fi
+
+if test "$javaDocRoot" == "" ; then
+    javaDocRoot="$docRoot/javadoc"
+fi
+
+if test "$htdocs" == "" ; then
+    htdocs="/home/groups/$(sed-from "$prjName" 's#\(.\).*#\1#g')/$(sed-from "$prjName" 's#\(..\).*#\1#g')/$prjName/htdocs"
+fi
+
+if test "$sourcesExcludedFromJar" == "" ; then
+    sourcesExcludedFromJar=''
+fi
+
+if test "$docFilesExcludedFromHomePage" == "" ; then
+    docFilesExcludedFromHomePage=''
+fi
+
+if test "$resourceFiles" == "" ; then
+    resourceFiles=""
+fi
+
+if ! declare -p | grep -q 'precompile-step' ; then
+    function precompile-step { echo -n '' ; }
+fi

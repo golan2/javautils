@@ -1,0 +1,212 @@
+#!/bin/bash
+
+# Copyright (C) 2002  MMM
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2 of the License, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+# more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc., 59
+# Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+source javautils-functions
+
+if test "$#" -lt 2 ; then
+    echo \
+'Usage: move-class [-just-remove-and-rename] original.package.ClassName new.package.ClassName
+
+This script moves the file compromising the class and renames all
+references to the class.
+
+IMPORTANT: This script is known to be unsafe. Use at your own risk!
+
+If you just want to remove the original java file and rename references
+to the original java file to refer to the new java file, use the option
+-just-remove-and-rename.
+
+NOTES:
+- Source and destination packages must not be top-level. In other words,
+  the source and destination package names must contain dots. Otherwise, the
+  operation would be even less safe.'
+    exit
+fi
+
+function declareStrings {
+    export ${1}Qcl="$2"
+
+    export ${1}Ucl=$(ucl-of-qcl $2)
+    export ${1}Pkg=$(pkg-of-qcl $2)
+
+    export ${1}Dir=$(dir-of-pkg $(pkg-of-qcl $2))
+    export ${1}Java=$(java-of-cl $2)
+}
+
+if test $1 != "-just-remove-and-rename" ; then
+    declareStrings src $1
+    declareStrings dst $2
+else
+    declareStrings src $2
+    declareStrings dst $3
+fi
+
+verbose=1
+
+if test $srcQcl = $dstQcl ; then
+    exit
+fi
+
+if ! grep-from $srcDir -q '/' || ! grep-from $dstDir -q '/' ; then
+    echo 'Error: Source and destination packages must not be top-level.'
+    exit 1
+fi
+
+if test ! -f $srcJava ; then
+    echo "Error: Original java file, \"$srcJava\", does not exists."
+    exit
+fi
+
+if test $1 != "-just-remove-and-rename" ; then
+    if test $(echo $srcUcl | to-lower) = $(echo $dstUcl | to-lower) ; then
+        tmp=$(tempfile)
+        mv $srcJava $tmp
+        if test -e "$dstJava" ; then
+            echo "Error: New java file, \"$dstJava\", already exists."
+            mv $tmp $srcJava
+            exit
+        fi
+        mkdir -p $dstDir
+        mv $tmp $dstJava
+    else
+        if test -e "$dstJava" ; then
+            echo "Error: New java file, \"$dstJava\", already exists."
+            exit
+        fi
+        mkdir -p $dstDir
+        mv $srcJava $dstJava
+    fi
+    if (($verbose)) ; then
+        echo "# move-class $srcQcl $dstQcl"
+    fi
+else
+    if (($verbose)) ; then
+        echo "# Removing $srcJava"
+    fi
+    rm $srcJava
+fi
+
+
+# Import and package patterns (never filenames)
+srcPkgPat=$(sed-from $srcPkg 's#\.#\\.#g')
+
+importDstClRep='import '$dstPkg'.'$dstUcl';'
+
+importWildcardSrcPkgPat='import'$wsPat$srcPkgPat'\.\*;'
+         importSrcClPat='import'$wsPat$srcPkgPat'\.'$srcUcl';'
+        defineSrcPkgPat='package'$wsPat$srcPkgPat';'
+
+importWildcardSrcPkgExp='s#'$importWildcardSrcPkgPat'#import '$srcPkg'.*; '$importDstClRep'#g'
+         importSrcClExp='s#'$importSrcClPat'#'$importDstClRep'#g'
+        defineSrcPkgExp='s#'$defineSrcPkgPat'#package '$srcPkg'; '$importDstClRep'#g'
+
+srcToDstPkgExp='s#'$defineSrcPkgPat'#package '$dstPkg'; import '$srcPkg'.*;#g'
+
+# Unqualified class pattern (only appropriate when import is found)
+
+molSrcUclPat=$idPrefixPat$srcUcl$idSuffixPat
+molSrcUclExp='s#'$molSrcUclPat'#\1'$dstUcl'\2#g'
+
+eolSrcUclPat=$idPrefixPat$srcUcl'$'
+eolSrcUclExp='s#'$eolSrcUclPat'#\1'$dstUcl'#g'
+
+# Qualified class pattern (might be filename)
+
+srcQclPat=$(sed-from $srcQcl -e 's#\.#[\.\\\/]*#g' -e 's#\[\.\\\/\]\*#\\([\.\\\/]*\\)#')
+dstQclRep=$(sed-from $dstQcl -e 's#\.#\\1#g')
+
+molSrcQclPat=$srcQclPat$idSuffixPat
+molSrcQclRep=$dstQclRep'\2'
+molSrcQclExp='s#'$molSrcQclPat'#'$molSrcQclRep'#g'
+
+eolSrcQclPat=$srcQclPat'$'
+eolSrcQclRep=$dstQclRep
+eolSrcQclExp='s#'$eolSrcQclPat'#'$eolSrcQclRep'#g'
+
+# Generic source package pattern
+
+srcGenericPkgPat=$(sed-from $srcPkg -e 's#\.#[\.\\\/]*#g')
+
+# TBD:
+# - What about prefix patterns?
+
+#if (($verbose)) ; then
+#    echo "# $importWildcardSrcPkgExp"
+#    echo "# $importSrcClExp"
+#    echo "# $defineSrcPkgExp"
+#    echo "# $srcToDstPkgExp"
+#    echo "# $molSrcUclExp"
+#    echo "# $eolSrcUclExp"
+#    echo "# $molSrcQclExp"
+#    echo "# $eolSrcQclExp"
+#fi
+
+# NOTE:
+# - All mol expressions are intentionally specified twice. Consider the case: Pattern(Pattern
+
+if test $dstPkg = $srcPkg ; then
+    for f in $(grep --recursive -l -e "$srcGenericPkgPat" $(find -mindepth 1 -maxdepth 1 -type d)) ; do
+        if grep -e "$importWildcardSrcPkgPat" \
+                -e "$importSrcClPat" \
+                -e "$defineSrcPkgPat" \
+                -q "$f" ; then
+            replace-in-file "$f" \
+                -e "$molSrcUclExp" \
+                -e "$molSrcUclExp" \
+                -e "$eolSrcUclExp"
+        fi
+        replace-in-file "$f" \
+            -e "$importSrcClExp" \
+            -e "$molSrcQclExp" \
+            -e "$molSrcQclExp" \
+            -e "$eolSrcQclExp"
+    done
+else
+    replace-in-file "$dstJava" \
+        -e "$molSrcUclExp" \
+        -e "$molSrcUclExp" \
+        -e "$eolSrcUclExp" \
+        -e "$molSrcQclExp" \
+        -e "$molSrcQclExp" \
+        -e "$eolSrcQclExp" \
+        -e "$srcToDstPkgExp"
+
+    for f in $(grep --recursive -l -e "$srcGenericPkgPat" $(find -mindepth 1 -maxdepth 1 -type d) | sed -e "s#.*$dstJava##") ; do
+        if grep -e "$molSrcUclPat" \
+                -e "$eolSrcUclPat" \
+                -q "$f" ; then
+            replace-in-file "$f" \
+                -e "$importWildcardSrcPkgExp" \
+                -e "$defineSrcPkgExp"
+        fi
+        if grep -e "$importWildcardSrcPkgPat" \
+                -e "$importSrcClPat" \
+                -e "$defineSrcPkgPat" \
+                -q "$f" ; then
+            replace-in-file "$f" \
+                -e "$molSrcUclExp" \
+                -e "$molSrcUclExp" \
+                -e "$eolSrcUclExp"
+        fi
+        replace-in-file "$f" \
+            -e "$importSrcClExp" \
+            -e "$molSrcQclExp" \
+            -e "$molSrcQclExp" \
+            -e "$eolSrcQclExp"
+    done
+fi

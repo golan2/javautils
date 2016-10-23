@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if test "$1" = "--help" ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g')
+
+Checks all HTML-files of the project (except for JavaDocs) with Tidy.
+
+Requires project-info."
+    exit
+fi
+
+source javautils-project-info
+
+if ! which tidy &> /dev/null ; then
+    echo "WARNING: Checking of HTML files skipped. The tidy command is unavailable."
+    exit
+fi
+
+echo "Looking for some trivial JavaDoc comment bugs..."
+grep -H -n -i \
+     -e ' *\*.*\(&&\|& \| < \| > \|<<\|>>\)' \
+     $(find $srcRoot -path '*.java' -a -not -name '.*')
+
+echo "Checking HTML files of $prjName with Tidy..."
+
+for file in $(find $prjRoot -path '*.htm*' -a -not -name '.*' -a -not -path '*/javadoc/*') ; do
+  if ! tidy -e -quiet "$file" ; then
+    echo "in $file"
+  fi
+done
+
+# TBD: Check links!

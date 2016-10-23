@@ -1,0 +1,28 @@
+#!/bin/bash
+
+if test "$1" = "--help" ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g')
+
+1. Removes compiled classes and performs clean on Makefiles under the
+   source root directory.
+2. Compiles everything.
+
+The intention is to make sure that no spurious stuff remains in the
+classes directory (or source directories).
+
+Requires project-info."
+    exit
+fi
+
+source javautils-project-info
+
+echo "Removing compiled classes of $prjName..."
+
+for makedir in $(echo "$(find $srcRoot -name 'Makefile')" | sed 's#Makefile$##'); do
+    make --quiet --no-print-directory -C $makedir clean
+done
+
+mkdir -p $classesRoot && \
+rm -rf $classesRoot/* && \
+javautils-compile

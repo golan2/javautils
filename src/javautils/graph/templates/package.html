@@ -1,0 +1,38 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>JavaDoc package comment</title>
+  </head>
+  <body>
+    <p>
+      Template Methods [<a
+      href="{@docRoot}/overview-summary.html#[Gamma1995]">Gamma1995</a>]
+      for graph algorithms.
+    </p>
+
+    <p>
+      The template methods in this package were designed after analyzing
+      the generic graph algorithms in the Boost Graph Library (BGL) [<a
+      href="{@docRoot}/overview-summary.html#[Siek2001]">Siek2001</a>].
+      Note that the BGL and JavaUtils implement generic graph algorithms
+      somewhat differently:
+    </p>
+    <ul>
+      <li>
+        JavaUtils define Template Methods rather than Visitors [<a
+        href="{@docRoot}/overview-summary.html#[Gamma1995]">Gamma1995</a>]
+        like BGL. Template methods are comparatively more convenient to
+        use in Java than in C++.
+      </li>
+      <li>
+        The overridable event point methods defined by JavaUtils template
+        methods are slightly different from the member functions defined
+        by BGL. In particular, the BFS Visitor of BGL and the {@link
+        javautils.graph.templates.BfsTemplate} have different semantics
+        for <code>finish_vertex()</code> and <code>finishNode()</code>,
+        respectively. The reason for these differences is that the current
+        semantics of JavaUtils seem simpler to the author.
+      </li>
+    </ul>
+  </body>
+</html>

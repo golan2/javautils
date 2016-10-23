@@ -1,0 +1,54 @@
+#!/bin/bash
+
+if test "$1" = "--help" ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g') [FILE ...]
+
+Checks the given source files for conformance to a few coding conventions:
+- Source files must not contain tabs, because tabs make it more difficult
+  to move from one editor to another.
+- Source files must not contain wildcard imports, because they make the
+  code more brittle with respect to changes in the imported packages and
+  also make it more difficult to automatically manipulate source files.
+
+Also makes some trivial edits to the source files:
+- Removes redundant whitespace at the end of line.
+
+This script is designed to be used on the CVS-server (commit-info)."
+    exit
+fi
+
+errorsFlag=0
+
+function strip-spaces-at-eol {
+    contents="$(cat "$1")"
+    echo "$contents" | sed -e $'s# \\+$##g' > "$1"
+}
+
+function check-for {
+    if grep -q -e "$1" "$2" ; then
+        echo "Error: $3. See below:" 1>&2
+        grep -H -n -e "$1" "$2" 1>&2
+        errorsFlag=1
+    fi
+}
+
+tabPat=$'\t'
+wildcardImportPat=$'^ *import [[:alnum:] .]\\+\\*'
+
+for f in "$@" ; do
+    if echo "$f" | grep -q -e '\.java$' -e '\.html$' ; then
+        check-for "$tabPat"            "$f" "Source files must not contain tabs"
+        check-for "$wildcardImportPat" "$f" "Source files must not contain wildcard imports"
+    fi
+done
+
+if test $errorsFlag -eq 0 ; then
+    for f in "$@" ; do
+        if echo "$f" | grep -q -e '\.java$' -e '\.html$' ; then
+            strip-spaces-at-eol "$f"
+        fi
+    done
+fi
+
+exit $errorsFlag

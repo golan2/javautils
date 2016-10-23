@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if test "$1" = --help ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g')
+
+Builds everything (including documentation, classes and Jar) and runs all
+tests of the project.
+
+Requires project-info."
+    exit
+fi
+
+source javautils-project-info
+
+mkdir -p $libRoot && \
+for dependency in $dependencies ; do \
+    if test -f $prjRoot/../$dependency/project-info ; then \
+        pushd $prjRoot/../$dependency > /dev/null && \
+        javautils-build-and-test && \
+        popd > /dev/null && \
+        cp $prjRoot/../$dependency/lib/*.jar $libRoot ; \
+    fi ; \
+done && \
+echo "Building $prjName..." && \
+javautils-build-jar && \
+javautils-test && \
+javautils-build-doc && \
+javautils-verify-html && \
+echo "Built and tested $prjName."

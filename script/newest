@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if test "$1" = "--help" ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g') [FILE ...]
+
+Prints the name of the newest file."
+    exit
+fi
+
+if test 0 -lt "$#" ; then
+    result="$1"
+
+    shift
+
+    while test 0 -lt "$#" ; do
+        if test "$1" -nt "$result" ; then
+            result="$1"
+        fi
+        shift
+    done
+
+    echo "$result"
+fi

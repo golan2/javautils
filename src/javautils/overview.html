@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>JavaUtils overview</title>
+  </head>
+  <body>
+    <p>
+      JavaUtils is a library of Java utility classes and packages. Among
+      other things, it contains utilities for functional programming.
+    </p>
+
+    <h2>About simple wrapper methods</h2>
+
+    <p>
+      Many methods in JavaUtils are <em>very simple</em> wrappers on Java
+      API methods intended to make it convenient to perform frequently
+      needed operations. These wrapper methods often translate
+      <em>checked</em> exceptions to <em>unchecked</em> exceptions, using
+      {@link javautils.Exceptions#toThrowUnchecked(Throwable)}, and
+      provide useful defaults for arguments. For example, {@link
+      javautils.Classes#newInstance(Class)} is a very simple utility
+      method for instantiating a class. The documentation of such methods
+      is usually provided in the form of a pseudo code snippet that
+      illustrates the semantics of the method. Such pseudo code snippets
+      are not the implementation of the method.
+    </p>
+
+    <h2>Naming conventions</h2>
+
+    <p>
+      The classes and methods in the JavaUtils-library are named fairly
+      systematically using a relatively small number of naming patterns.
+    </p>
+
+    <h3>Method naming</h3>
+
+    <p>
+      The naming conventions used in the JavaUtils-library are different
+      from the Java naming conventions used by Sun. In JavaUtils, in
+      general, method names start with a verb if the method is decisively
+      <em>imperative</em> and the client calls the method explicitly for
+      the <em>side-effects</em> of the method. On the other hand, methods
+      that are <em>functional</em>, and do not have externally observable
+      <em>side-effects</em> do not, in general, start with a verb. We feel
+      that these conventions yield short and logical names that
+      communicate the intentions of the methods well.
+    </p>
+
+    <h3>Class naming patterns</h3>
+
+    <dl>
+      <dt><code>Abstract*</code></dt>
+      <dd>Example: {@link javautils.maps.AbstractTypedMap}</dd>
+      <dd>An abstract class intended to be derived from to form a concrete class that implements some interface.</dd>
+      <dt><code>Basic*</code></dt>
+      <dd>Example: {@link javautils.graph.testing.BasicGraph}</dd>
+      <dd>A basic implementation of some interface. Usually not intended to serve the needs of all users.</dd>
+      <dt><code>*Builder</code></dt>
+      <dd>Example: {@link javautils.graph.GraphBuilder}</dd>
+      <dd>A Builder [<a href="{@docRoot}/overview-summary.html#[Gamma1995]">Gamma1995</a>] is used for building complex objects.</dd>
+      <dt><code>*Constants</code></dt>
+      <dd>Example: {@link javautils.graph.testing.TestGraphConstants}</dd>
+      <dd>An interface that defines useful constants. To use the constants, you can "implement" the interface to get convenient access to the constants.</dd>
+      <dt><code>*Contract</code></dt>
+      <dd>Example: {@link javautils.graph.GraphContract}</dd>
+      <dd>A Design-by-Contract [<a href="{@docRoot}/overview-summary.html#[Meyer1997]">Meyer1997</a>] Decorator [<a href="{@docRoot}/overview-summary.html#[Gamma1995]">Gamma1995</a>] for an interface.</dd>
+      <dt><code>*Decorator</code></dt>
+      <dd>Example: {@link javautils.graph.GraphDecorator}</dd>
+      <dd>A basic forwarding Decorator [<a href="{@docRoot}/overview-summary.html#[Gamma1995]">Gamma1995</a>] for an interface that simply forwards all operations to the decorated object.</dd>
+      <dt><code>*Holder</code></dt>
+      <dd>Example: {@link javautils.holders.IntHolder}</dd>
+      <dd>A holder for a primitive value or reference. Used for storing primitive values in collections and to emulate lexical binding [<a href="{@docRoot}/overview-summary.html#[Abelson1995]">Abelson1995</a>] with anonymous inner classes.</dd>
+      <dt><code>*Map</code></dt>
+      <dd>Example: {@link javautils.maps.ObjectToIntMap}</dd>
+      <dd>A class the represents a binary relation between keys and values.</dd>
+      <dt><code>*s (plural)</code></dt>
+      <dd>Example: {@link javautils.graph.Graphs}</dd>
+      <dd>A class that contains static utility methods that implement algorithms relating to some concept.</dd>
+      <dt><code>*Template</code></dt>
+      <dd>Example: {@link javautils.graph.templates.BfsTemplate}</dd>
+      <dd>An abstract Template Method [<a href="{@docRoot}/overview-summary.html#[Gamma1995]">Gamma1995</a>] class.</dd>
+      <dt><code>*Test</code></dt>
+      <dd>Example: {@link javautils.collections.AlgsTest}</dd>
+      <dd>An automated [<a href="{@docRoot}/overview-summary.html#[JUnit]">JUnit</a>] unit test class.</dd>
+      <dt><code>*To*</code></dt>
+      <dd>Example: {@link javautils.fun.ObjectToObjectToBoolean}</dd>
+      <dd>A systematically named abstract class that represents an anonymous function [<a href="{@docRoot}/overview-summary.html#[Abelson1995]">Abelson1995</a>] (or a Strategy [<a href="{@docRoot}/overview-summary.html#[Gamma1995]">Gamma1995</a>]). The name reflects the type of the underlying function.</dd>
+    </dl>
+
+    <h2>References</h2>
+
+    <p>
+      The following is a complete alphabetical listing of references made
+      in the documentation. Please note that this documentation is not
+      intended as an introduction to software design. The references point
+      out to readily available software design, algorithm and programming
+      texts whose material is general enough that it is not worth
+      rephrasing here.
+    </p>
+
+    <dl>
+      <dt class="BibEntry"><a name="[Abelson1995]">[Abelson1995]</a></dt>
+      <dd class="BibTitle">Structure and Interpretation of Computer Programs, 2nd. ed.</dd>
+      <dd class="BibAuthors">Abelson, Sussman and Sussman</dd>
+      <dd class="BibISBN">ISBN 0-262-01153-0</dd>
+      <dt class="BibEntry"><a name="[Cormen2001]">[Cormen2001]</a></dt>
+      <dd class="BibTitle">Introduction to Algorithms, 2nd. ed.</dd>
+      <dd class="BibAuthors">Cormen, Leiserson, Rivest and Stein</dd>
+      <dd class="BibISBN">ISBN 0-262-53196-8</dd>
+      <dt class="BibEntry"><a name="[Fowler1999]">[Fowler1999]</a></dt>
+      <dd class="BibTitle">Refactoring: Improving the Design of Existing Code</dd>
+      <dd class="BibAuthors">Martin Fowler</dd>
+      <dd class="BibISBN">ISBN 0-201-48567-2</dd>
+      <dt class="BibEntry"><a name="[Gamma1995]">[Gamma1995]</a></dt>
+      <dd class="BibTitle">Design Patterns: Elements of Reusable Object-Oriented Software</dd>
+      <dd class="BibAuthors">Gamma, Helm, Johnson and Vlissides</dd>
+      <dd class="BibISBN">ISBN 0-201-63361-2</dd>
+      <dt class="BibEntry"><a name="[JUnit]">[JUnit]</a></dt>
+      <dd class="BibTitle">"JUnit is a simple framework to write repeatable tests."</dd>
+      <dd class="BibAuthors">JUnit was originally designed by Erich Gamma and Kent Beck.</dd>
+      <dd class="BibExtLink"><a href="http://www.junit.org">JUnit (http://www.junit.org)</a></dd>
+      <dt class="BibEntry"><a name="[Kuhne1999]">[K&uuml;hne1999]</a></dt>
+      <dd class="BibTitle">A Functional Pattern System for Object-Oriented Design</dd>
+      <dd class="BibAuthors">Thomas K&uuml;hne</dd>
+      <dd class="BibISBN">ISBN 3-86064-770-9</dd>
+      <dd class="BibExtLink"><a href="http://www.mm.informatik.tu-darmstadt.de/~kuehne/fps">FPS - Functional Pattern System (http://www.mm.informatik.tu-darmstadt.de/~kuehne/fps)</a></dd>
+      <dt class="BibEntry"><a name="[Martin2002]">[Martin2002]</a></dt>
+      <dd class="BibTitle">Agile Software Development: Principles, Patterns, and Practices</dd>
+      <dd class="BibAuthors">Robert Cecil Martin</dd>
+      <dd class="BibISBN">ISBN 0-13-597444-5</dd>
+      <dt class="BibEntry"><a name="[Meyer1997]">[Meyer1997]</a></dt>
+      <dd class="BibTitle">Object-Oriented Software Construction, 2nd. ed.</dd>
+      <dd class="BibAuthors">Bertrand Meyer</dd>
+      <dd class="BibISBN">ISBN 0-13-629155-4</dd>
+      <dt class="BibEntry"><a name="[PLOP3]">[PLOP3]</a></dt>
+      <dd class="BibTitle">Pattern Languages of Program Design 3</dd>
+      <dd class="BibAuthors">Edited by Robert Martin, Dirk Riehle and Frank Buschmann.</dd>
+      <dd class="BibISBN">ISBN 0-201-31011-2</dd>
+      <dt class="BibEntry"><a name="[Siek2001]">[Siek2001]</a></dt>
+      <dd class="BibTitle">The Boost Graph Library: User Guide and Reference Manual</dd>
+      <dd class="BibAuthors">Jeremy Siek, Lie-Quan Lee and Andrew Lumsdaine</dd>
+      <dd class="BibISBN">ISBN 0-201-72914-8</dd>
+      <dd class="BibExtLink"><a href="http://www.boost.org/libs/graph/doc/">The Boost Graph Library (http://www.boost.org/libs/graph/doc)</a></dd>
+      <dt class="BibEntry"><a name="[Weiss1997]">[Weiss1997]</a></dt>
+      <dd class="BibTitle">Data Structures and Algorithm Analysis in C, 2nd. ed.</dd>
+      <dd class="BibAuthors">Mark Allen Weiss</dd>
+      <dd class="BibISBN">ISBN 0-201-49840-5</dd>
+    </dl>
+  </body>
+</html>

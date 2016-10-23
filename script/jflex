@@ -1,0 +1,4 @@
+#!/bin/sh
+
+export CLASSPATH="$(javautils-read-classpath jflex jflexClasspath):$CLASSPATH" && \
+exec java JFlex.Main "$@"

@@ -1,0 +1,26 @@
+==========================================================================
+
+This file only summarizes the main changes. There is no intention to track
+all changes in detail here.
+
+==========================================================================
+
+--------------------------------------------------------------------------
+Revision:
+- Added generated code statistics, method level metrics and import
+  information to HTML documentation.
+- Made classpaths configurable through properties (.javautils.properties).
+- Added --help option to most scripts.
+- Started using a custom stylesheet in the JavaDoc documentation.
+- Added (automatically generated) holders for all primitive types.
+- Added (automatically generated) typed maps for all primitive types.
+- Added Algs.drop and Algs.take
+- Added class javautils.jdbc.JDBC
+
+--------------------------------------------------------------------------
+Revision: javautils-03-12-17-a
+- Some minor improvements to the project maintenance scripts.
+
+--------------------------------------------------------------------------
+Revision: javautils-03-12-15-a
+- Initial stable release.

@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if test "$#" -ne 1 -o "$1" = --help ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g') <destination directory>
+
+Copies resource files under the source files directory to the specified
+destination directory.
+
+Requires project-info."
+    exit
+fi
+
+source javautils-project-info
+
+for src in $(find $srcRoot -regex "$resourceFiles") ; do
+    dst="$(echo "$src" | sed "s#^$srcRoot#$1#g")"
+    mkdir -p "$(dirname "$dst")"
+    cp "$src" "$dst"
+done

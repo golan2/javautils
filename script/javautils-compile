@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if test "$1" = --help ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g')
+
+Compiles all source files of the project into the class files directory.
+
+Requires project-info."
+    exit
+fi
+
+source javautils-project-info
+
+echo "Compiling $prjName..."
+
+for makedir in $(echo "$(find $srcRoot -name 'Makefile')" | sed 's#Makefile$##'); do
+    make --quiet --no-print-directory -C $makedir
+done
+
+mkdir -p $classesRoot && \
+javautils-update-test-runner-constants && \
+precompile-step && \
+if test $(newest $(find $srcRoot -type f -not -path '*/CVS/*')) -nt $(newest project-info $(find $classesRoot -type f)) ; then \
+    export CLASSPATH="$(javautils-read-classpath "$prjName" "${prjName}Classpath"):$CLASSPATH" && \
+    javac -source 1.4 \
+          -deprecation \
+          -d $classesRoot \
+          $(find $srcRoot -path '*.java' -a -not -name '.*') && \
+    javautils-copy-resources $classesRoot ; \
+else \
+    echo "...which already appears to be up to date." ; \
+fi

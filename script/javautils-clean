@@ -1,0 +1,29 @@
+#!/bin/bash
+
+if test "$1" = "--help" ; then
+    echo \
+"Usage: $(echo $0 | sed 's#.*/##g')
+
+Removes all generated/compiled files of the project.
+
+Requires project-info."
+    exit
+fi
+
+source javautils-project-info
+
+echo "Removing all generated/compiled files of $prjName..."
+
+for makedir in $(echo "$(find $srcRoot -name 'Makefile')" | sed 's#Makefile$##'); do
+    make --quiet --no-print-directory -C $makedir clean
+done
+
+for makedir in $(echo "$(find $docRoot -name 'Makefile')" | sed 's#Makefile$##'); do
+    make --quiet --no-print-directory -C $makedir clean
+done
+
+mkdir -p $classesRoot && rm -rf $classesRoot/* && \
+mkdir -p $libRoot && rm -rf $libRoot/* && \
+mkdir -p $javaDocRoot && rm -rf $javaDocRoot/* && \
+mkdir -p $docRoot/gen-htmls && rm -rf $docRoot/gen-htmls && \
+rm -rf $tmpDir

@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# Copyright (C) 2002  MMM
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2 of the License, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+# more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc., 59
+# Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+source javautils-functions
+
+if test "$#" -ne 2 ; then
+    echo \
+'Usage: move-res original.package.ResClassNoSuffix new.package.ResClassNoSuffix
+
+This script moves the specified resource file(s).
+
+IMPORTANT: This script is known to be unsafe. Use at your own risk!
+
+NOTES:
+- Source and destination packages must not be top-level. In other words,
+  the source and destination package names must contain dots. Otherwise, the
+  operation would be even less safe.'
+    exit
+fi
+
+echo "# move-res $1 $2"
+
+if test $1 = $2 ; then
+    exit
+fi
+
+srcCl=$1
+srcUcl=$(ucl-of-qcl $srcCl)
+srcPkg=$(pkg-of-qcl $srcCl)
+
+dstCl=$2
+dstUcl=$(ucl-of-qcl $dstCl)
+dstPkg=$(pkg-of-qcl $dstCl)
+dstDir=$(dir-of-pkg $dstPkg)
+
+for file in $(find $(dir-of-pkg $srcPkg) -path '*/'$srcUcl'_*.java') ; do
+    replace-in-file $file \
+        -e "s#$srcPkg#$dstPkg#g" \
+        -e "s#$srcUcl#$dstUcl#g"
+    mv $file $dstDir/$dstUcl'_'$(sed-from $file -e 's#.*_##g')
+done
+
+for file in $(grep -l --recursive $srcCl $(find -mindepth 1 -maxdepth 1 -type d)) ; do
+    replace-in-file $file -e "s#$srcCl#$dstCl#g"
+done
